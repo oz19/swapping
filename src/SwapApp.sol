@@ -18,10 +18,18 @@ contract SwapApp {
         v2Router02Address = v2Router02Address_;
     }
 
-    function swapTokens(uint256 amountIn_, uint256 amountOutMin_, address[] memory path_, uint256 deadline_) external {
+    function swapTokens(
+        uint256 amountIn_,
+        uint256 amountOutMin_,
+        address[] memory path_,
+        uint256 deadline_
+    ) external {
+        require(path_.length >= 2, "Path must have at least 2 tokens");
+
         IERC20(path_[0]).safeTransferFrom(msg.sender, address(this), amountIn_);
-        IERC20(path_[0]).approve(v2Router02Address, amountIn_);
-        uint[] memory amountsOut_= IV2Router02(v2Router02Address).swapExactTokensForTokens(
+        IERC20(path_[0]).forceApprove(v2Router02Address, amountIn_);
+
+        uint[] memory amountsOut_ = IV2Router02(v2Router02Address).swapExactTokensForTokens(
             amountIn_,
             amountOutMin_,
             path_,
@@ -30,7 +38,6 @@ contract SwapApp {
         );
 
         emit SwapTokens(path_[0], path_[path_.length - 1], amountIn_, amountsOut_[amountsOut_.length - 1]);
-
     }
 
 }
